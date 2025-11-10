@@ -9,7 +9,7 @@ const FREE_MODELS = [
   "openchat/openchat-7b"
 ];
 
-export async function callWithFallback(userIdea: string): Promise<string> {
+export async function callWithFallback(userIdea: string, refererUrl: string): Promise<string> {
   for (const model of FREE_MODELS) {
     try {
       console.log(`Trying model: ${model}`);
@@ -18,7 +18,7 @@ export async function callWithFallback(userIdea: string): Promise<string> {
         headers: {
           "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
           "Content-Type": "application/json",
-          "HTTP-Referer": "https://prompt-dost.vercel.app",
+          "HTTP-Referer": refererUrl,
           "X-Title": "PromptDost"
         },
         body: JSON.stringify({
@@ -37,12 +37,12 @@ export async function callWithFallback(userIdea: string): Promise<string> {
           temperature: 0.7
         }),
         // @ts-ignore
-        timeout: 12000
+        timeout: 10000 // 10 सेकंड
       });
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.warn(`Model ${model} failed: ${errorText}`);
+        console.warn(`Model ${model} failed (${response.status}):`, errorText);
         continue;
       }
 
@@ -51,10 +51,10 @@ export async function callWithFallback(userIdea: string): Promise<string> {
       if (content) {
         return content;
       }
-    } catch (error) {
-      console.warn(`Model ${model} threw error:`, error);
+    } catch (error: any) {
+      console.warn(`Model ${model} threw error:`, error.message || error);
     }
   }
 
-  throw new Error("सभी AI मॉडल्स व्यस्त हैं। कृपया कुछ सेकंड बाद पुनः प्रयास करें।");
+  throw new Error("सभी मॉडल्स व्यस्त या अनुपलब्ध हैं। कृपया बाद में प्रयास करें।");
 }
