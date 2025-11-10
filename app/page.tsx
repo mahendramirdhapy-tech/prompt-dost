@@ -1,4 +1,3 @@
-// app/page.tsx
 "use client";
 
 import { useState } from "react";
@@ -19,18 +18,21 @@ export default function Home() {
     setPrompt("");
 
     try {
-      const res = await fetch("/api/generate", {
+      const response = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idea: idea.trim() })
+        body: JSON.stringify({
+          idea: idea.trim(),
+          referer: window.location.origin // ✅ ऑटोमैटिक Vercel URL
+        })
       });
 
-      const data = await res.json();
+      const data = await response.json();
 
-      if (res.ok) {
+      if (response.ok) {
         setPrompt(data.prompt);
       } else {
-        setError(data.error || "कुछ गड़बड़ हुई, कृपया दोबारा कोशिश करें।");
+        setError(data.error || "कुछ गड़बड़ हुई।");
       }
     } catch (err) {
       setError("नेटवर्क त्रुटि। कृपया इंटरनेट चेक करें।");
@@ -49,10 +51,7 @@ export default function Home() {
   return (
     <div style={{ padding: "2rem", maxWidth: "800px", margin: "0 auto" }}>
       <h1 style={{ color: "#4F46E5", fontSize: "2.2rem" }}>✨ PromptDost</h1>
-      <p>
-        अपना साधारण विचार लिखें — हम बना देंगे{" "}
-        <strong>AI के लिए परफेक्ट प्रॉम्प्ट</strong>!
-      </p>
+      <p>अपना साधारण विचार लिखें — हम बना देंगे <strong>AI के लिए परफेक्ट प्रॉम्प्ट</strong>!</p>
 
       <textarea
         value={idea}
@@ -100,7 +99,6 @@ export default function Home() {
               whiteSpace: "pre-wrap",
               wordBreak: "break-word",
               fontSize: "15px",
-              marginTop: "10px",
               lineHeight: 1.5
             }}
           >
