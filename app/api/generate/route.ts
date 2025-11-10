@@ -1,60 +1,28 @@
-// lib/openrouter.ts
+// app/api/generate/route.ts
+import { callWithFallback } from "../../../lib/openrouter";
+import { NextRequest } from "next/server";
 
-const FREE_MODELS = [
-  "deepseek/deepseek-r1",
-  "meta-llama/llama-3-8b-instruct",
-  "mistralai/mistral-7b-instruct",
-  "gryphe/mythomax-l2-13b",
-  "google/gemma-7b-it",
-  "openchat/openchat-7b"
-];
+export const maxDuration = 15;
 
-export async function callWithFallback(userIdea: string, refererUrl: string): Promise<string> {
-  for (const model of FREE_MODELS) {
-    try {
-      console.log(`Trying model: ${model}`);
-      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
-          "Content-Type": "application/json",
-          "HTTP-Referer": refererUrl,
-          "X-Title": "PromptDost"
-        },
-        body: JSON.stringify({
-          model: model,
-          messages: [
-            {
-              role: "system",
-              content: "You are an expert prompt engineer. Convert the user's simple idea into a detailed, effective, and ready-to-use AI prompt in English. Keep it clear, specific, and optimized for best results."
-            },
-            {
-              role: "user",
-              content: `User idea: ${userIdea}`
-            }
-          ],
-          max_tokens: 500,
-          temperature: 0.7
-        }),
-        // @ts-ignore
-        timeout: 10000 // 10 सेकंड
-      });
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const { idea, referer } = body;
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.warn(`Model ${model} failed (${response.status}):`, errorText);
-        continue;
-      }
-
-      const data = await response.json();
-      const content = data?.choices?.[0]?.message?.content?.trim();
-      if (content) {
-        return content;
-      }
-    } catch (error: any) {
-      console.warn(`Model ${model} threw error:`, error.message || error);
+    if (!idea || typeof idea !== "string" || idea.trim().length < 3) {
+      return Response.json(
+        { error: "कृपया कम से कम 3 अक्षरों का विचार लिखें।" },
+        { status: 400 }
+      );
     }
-  }
 
-  throw new Error("सभी मॉडल्स व्यस्त या अनुपलब्ध हैं। कृपया बाद में प्रयास करें।");
+    const optimizedPrompt = await callWithFallback(
+      idea.trim(),
+      referer || "https://prompt-dost.vercel.app"
+    );
+    return Response.json({ prompt: optimizedPrompt });
+  } catch (error: any) {
+    console.error("API Error:", error.message);
+    return Response.json({ error: error.message }, { status: 500 });
+  }
 }
