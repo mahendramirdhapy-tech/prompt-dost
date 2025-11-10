@@ -47,9 +47,12 @@ export default function Home() {
   };
 
   return (
-    <div style={{ padding: "2rem", fontFamily: "sans-serif", maxWidth: "800px", margin: "0 auto" }}>
+    <div style={{ padding: "2rem", maxWidth: "800px", margin: "0 auto" }}>
       <h1 style={{ color: "#4F46E5", fontSize: "2.2rem" }}>✨ PromptDost</h1>
-      <p>अपना साधारण विचार लिखें — हम बना देंगे <strong>AI के लिए परफेक्ट प्रॉम्प्ट</strong>!</p>
+      <p>
+        अपना साधारण विचार लिखें — हम बना देंगे{" "}
+        <strong>AI के लिए परफेक्ट प्रॉम्प्ट</strong>!
+      </p>
 
       <textarea
         value={idea}
@@ -61,7 +64,8 @@ export default function Home() {
           marginTop: "1rem",
           padding: "12px",
           borderRadius: "8px",
-          border: "1px solid #ddd"
+          border: "1px solid #ddd",
+          fontSize: "16px"
         }}
       />
 
@@ -96,7 +100,8 @@ export default function Home() {
               whiteSpace: "pre-wrap",
               wordBreak: "break-word",
               fontSize: "15px",
-              marginTop: "10px"
+              marginTop: "10px",
+              lineHeight: 1.5
             }}
           >
             {prompt}
