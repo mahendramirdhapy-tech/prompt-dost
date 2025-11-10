@@ -5,8 +5,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body>
+    <html lang="hi">
+      <body style={{ fontFamily: 'system-ui, sans-serif' }}>
         {children}
       </body>
     </html>
