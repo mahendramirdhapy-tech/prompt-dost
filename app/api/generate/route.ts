@@ -1,8 +1,8 @@
 // app/api/generate/route.ts
-import { callWithFallback } from "@/lib/openrouter";
+import { callWithFallback } from "../../../lib/openrouter";
 import { NextRequest } from "next/server";
 
-export const maxDuration = 15; // Vercel Serverless Function timeout
+export const maxDuration = 15;
 
 export async function POST(req: NextRequest) {
   try {
@@ -10,7 +10,10 @@ export async function POST(req: NextRequest) {
     const { idea } = body;
 
     if (!idea || typeof idea !== "string" || idea.trim().length < 3) {
-      return Response.json({ error: "Please enter a valid idea (at least 3 characters)." }, { status: 400 });
+      return Response.json(
+        { error: "कृपया कम से कम 3 अक्षरों का विचार लिखें।" },
+        { status: 400 }
+      );
     }
 
     const optimizedPrompt = await callWithFallback(idea.trim());
