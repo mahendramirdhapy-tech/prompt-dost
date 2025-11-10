@@ -1,6 +1,5 @@
 // lib/openrouter.ts
 
-// सभी फ्री/लो-कॉस्ट मॉडल्स — DeepSeek-R1 को पहले रखा गया है
 const FREE_MODELS = [
   "deepseek/deepseek-r1",
   "meta-llama/llama-3-8b-instruct",
@@ -19,7 +18,7 @@ export async function callWithFallback(userIdea: string): Promise<string> {
         headers: {
           "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
           "Content-Type": "application/json",
-          "HTTP-Referer": "https://prompt-dost.vercel.app", // जरूरी (OpenRouter के लिए)
+          "HTTP-Referer": "https://prompt-dost.vercel.app",
           "X-Title": "PromptDost"
         },
         body: JSON.stringify({
@@ -37,19 +36,19 @@ export async function callWithFallback(userIdea: string): Promise<string> {
           max_tokens: 500,
           temperature: 0.7
         }),
-        timeout: 12000 // 12 सेकंड टाइमआउट
+        // @ts-ignore
+        timeout: 12000
       });
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.warn(`Model ${model} failed with status ${response.status}:`, errorText);
+        console.warn(`Model ${model} failed: ${errorText}`);
         continue;
       }
 
       const data = await response.json();
       const content = data?.choices?.[0]?.message?.content?.trim();
       if (content) {
-        console.log(`Success with model: ${model}`);
         return content;
       }
     } catch (error) {
@@ -57,5 +56,5 @@ export async function callWithFallback(userIdea: string): Promise<string> {
     }
   }
 
-  throw new Error("All AI models are currently busy. Please try again in a few seconds.");
+  throw new Error("सभी AI मॉडल्स व्यस्त हैं। कृपया कुछ सेकंड बाद पुनः प्रयास करें।");
 }
